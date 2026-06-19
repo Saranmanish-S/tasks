@@ -16,23 +16,17 @@ function EditProfile() {
   const {
     control,
     handleSubmit,
-    setValue,
+    reset,
   } = useForm();
 
   useEffect(() => {
 
     if (loggedInUser) {
 
-      setValue("fname", loggedInUser.fname)
-
-      setValue("lname",loggedInUser.lname);
-
-      setValue("email",loggedInUser.email);
-
-      setValue("pass",loggedInUser.pass);
+      reset(loggedInUser)
     }
 
-  }, [loggedInUser, setValue]);
+  }, [loggedInUser, reset]);
 
   const onSubmit = (data) => {
 

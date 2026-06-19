@@ -1,69 +1,85 @@
-import React, { Component } from "react";
+import React, { useState } from "react";
 import { connect } from "react-redux";
 import { loginUser } from "../redux/userSlice";
 import {withNavigation} from "../utils/withNavigation";
-import {Button, Input, Card } from "antd"
-class LoginPage extends Component {
-    state = { 
-        email: "",
-        pass: "",
-        error: ""
-    }
+import {Button, Input, Card, Form} from "antd"
+import {useForm, Controller} from "react-hook-form"
 
-    handleSubmit = (e) => {
-        e.preventDefault()
+function LoginPage(props) {
 
-        const {users} = this.props
+    const {control,watch,handleSubmit} = useForm()
+    const email = watch("email", "")
+    const[error, setError] = useState("")
+
+    const onSubmit = (data) => {
         
-        const foundUser = users.find(
+        const foundUser = props.users.find(
             (user) =>
                 user &&
-                user.email === this.state.email &&
-                user.pass === this.state.pass
+                user.email === data.email &&
+                user.pass === data.pass
         )
 
         if(foundUser){
-            this.setState({error: ""})
-            this.props.loginUser(foundUser)
-            const from = this.props.location?.state?.from || "/table"
-            this.props.navigate(from)
+            setError("")
+            props.loginUser(foundUser)
+            const from = props.location?.state?.from || "/table"
+            props.navigate(from)
         }
         else{
-            this.setState({
-                error: "Invalid Email or Password"
-            })
+            setError(
+                "Invalid Email or Password"
+            )
         }
     }
 
-    render() {
+    
         return (
-            <Card
-                title="Login Page"
-                style={{
-                    width: 350,
-                    margin: "50px auto"
-                }}
+            <>
+                <Card
+                    title="User Registration"
+                    style={{
+                    width: 600,
+                    margin: "30px auto"
+                    }}
                 >
 
-                <form onSubmit={this.handleSubmit}>
-                <Input
-                    placeholder="Enter your email"
-                    style={{ marginBottom: "20px" }}
-                    onChange={(e)=>this.setState({email: e.target.value})}
+                <Form onFinish = {handleSubmit(onSubmit)}>
+                
+                <Form.Item label="Email">
+                <Controller
+                    name="email"
+                    control={control}
+                    render={({field}) => (
+                        <Input {...field} />
+                     )}
                 />
-                <Input.Password
-                    placeholder="Enter your password"
-                    style={{ marginBottom: "20px" }}
-                    onChange={(e)=>this.setState({pass: e.target.value})}
-                />
+                </Form.Item>
+
+                
+                {email && (
+                    <Form.Item label="Pass">
+                    <Controller
+                        name="pass"
+                        control={control}
+                        render={({field}) => (
+                            <Input.Password {...field} />
+                         )}
+                    />
+                    </Form.Item>
+                )}
+                
 
                 <Button type="primary" htmlType="submit" block>Login</Button>
-                <p style={{ color: "red" }}>{this.state.error}</p>
-                </form>
-            </Card>
+                <p style={{ color: "red" }}>{error}</p>
+
+                </Form>
+                </Card>
+                </>
+                
         )
     }
-}
+
 
 const mapStateToProps = (state) => ({
     users: state.user.users,
